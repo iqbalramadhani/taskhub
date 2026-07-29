@@ -54,7 +54,7 @@
 
                 {{-- Projects --}}
                 @if (Route::has('tasks.index'))
-                    <a href="{{ route('projects.index') }}"
+                    <a href=""
                         class="flex items-center gap-[11px] px-3 py-[9px] rounded-[10px]
               text-[13.5px] font-medium mb-[2px] transition-all
               {{ request()->routeIs('projects.*')
