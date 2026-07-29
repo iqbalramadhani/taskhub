@@ -22,35 +22,44 @@ class TaskController extends Controller
         $project['description'] = 'Deskripsi Project Buat Di Tes';
         $project['tasks'] = $task;
 
-        return view('projects.show',compact('data','project'));
+        return view('projects.show', compact('data', 'project'));
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Project $project)
     {
-        $project = Project::findOrFail(1);
-        return view('task.show', compact('project'));
+        abort_if($project->user_id !== auth()->id(), 403);
+        return view('tasks.create', compact('project'));
     }
 
     /**
      * 
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, Project $project)
     {
-        $title = $request->title;
-        $description = $request->description;
+        abort_if($project->user_id !== auth()->id(), 403);
 
-        $task = new Task();
-        $task->title = $title;
-        $task->description = $description;
-        $task->project_id = 1;
-        $task->user_id = 1;
-        $task->save();
+        $validated = $request->validate([
+            'title'       => 'required|string|min:3|max:255',
+            'description' => 'nullable|string',
+            'priority'    => 'required|in:low,medium,high',
+            'due_date'    => 'nullable|date|after_or_equal:today',
+        ]);
 
-        return redirect()->route('tasks.index');
+        $project->tasks()->create([
+            'user_id'      => auth()->id(),
+            'title'        => $validated['title'],
+            'description'  => $validated['description'] ?? null,
+            'priority'     => $validated['priority'],
+            'due_date'     => $validated['due_date'] ?? null,
+            'is_completed' => false,
+        ]);
+
+        return redirect()->route('projects.show', $project)
+            ->with('success', 'Tugas berhasil ditambahkan!');
     }
 
     /**
