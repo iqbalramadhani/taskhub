@@ -42,6 +42,7 @@ class TaskController extends Controller
     {
         abort_if($project->user_id !== auth()->id(), 403);
 
+        // untuk validasi
         $validated = $request->validate([
             'title'       => 'required|string|min:3|max:255',
             'description' => 'nullable|string',
@@ -49,6 +50,9 @@ class TaskController extends Controller
             'due_date'    => 'nullable|date|after_or_equal:today',
         ]);
 
+        // dd($validated);
+
+        // simpan task
         $project->tasks()->create([
             'user_id'      => auth()->id(),
             'title'        => $validated['title'],
@@ -73,24 +77,52 @@ class TaskController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Task $task)
+    public function edit(Project $project, Task $task)
     {
-        //
+        // pengecekan apakah ini task milik user
+        abort_if($task->user_id !== auth()->id(), 403);
+        return view('tasks.edit', compact('project', 'task'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Task $task)
+    public function update(Request $request, Project $project, Task $task)
     {
-        //
+        // pengecekan apakah ini task milik user
+        abort_if($task->user_id !== auth()->id(), 403);
+
+        // validasi data
+        $validated = $request->validate([
+            'title'       => 'required|string|min:3|max:255',
+            'description' => 'nullable|string',
+            'priority'    => 'required|in:low,medium,high',
+            'due_date'    => 'nullable|date',
+        ]);
+
+        // update task
+        $task->update($validated);
+
+        return redirect()->route('projects.show', $project)->with('success', 'Tugas berhasil diperbarui!');
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Task $task)
+    public function destroy(Project $project, Task $task)
     {
-        //
+        abort_if($task->user_id !== auth()->id(), 403);
+        // hapus task terkait pada project yang di pilih
+        $task->delete();
+
+        return redirect()->route('projects.show', $project)->with('success', 'Tugas berhasil dihapus!');
+    }
+
+    public function toggle(Task $task)
+    {
+        abort_if($task->user_id !== auth()->id(), 403);
+        $task->update(['is_completed' => !$task->is_completed]);
+        $msg = $task->is_completed ? 'Tugas ditandai selesai!' : 'Tugas dibuka kembali.';
+        return back()->with('success', $msg);
     }
 }

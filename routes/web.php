@@ -26,6 +26,12 @@ Route::middleware('auth')->group(function () {
     // DELETE /projects/{id} → destroy() (hapus)
     Route::resource('projects', ProjectController::class);
 
+    // GET /projects/{id} → show() (detail)
+    // GET /projects/{id}/tasks/create → create() (form tambah)
+    // POST /projects/{id}/tasks → store() (simpan baru)
+    // GET /projects/{id}/tasks/{id}/edit → edit() (form edit)
+    // PUT /projects/{id}/tasks/{id} → update() (simpan perubahan)
+    // DELETE /projects/{id}/tasks/{id} → destroy() (hapus)
     Route::resource('projects.tasks', TaskController::class)->except(['index', 'show']);
 
     Route::patch('task/{task}/toggle', [TaskController::class, 'toggle'])->name('tasks.toggle');
