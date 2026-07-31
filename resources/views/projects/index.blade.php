@@ -35,44 +35,47 @@
         {{-- Langkah 3: Grid kartu project (muncul kalau ada data) --}}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             @foreach ($projects as $project)
-                <a href="{{ route('projects.show', $project) }}"
-                    class="bg-white rounded-2xl border border-[#ECECE9] p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 block relative overflow-hidden group">
-                    {{-- Strip warna di atas kartu --}}
-                    <div class="absolute top-0 left-0 right-0 h-[3px]" style="background-color:{{ $project->color }}"></div>
-                    {{-- Nama project + dot warna --}}
-                    <div class="flex items-center gap-2 mb-2 mt-1">
-                        <span class="w-[10px] h-[10px] rounded-full shrink-0"
-                            style="background-color:{{ $project->color }}"></span>
-                        <h3 class="font-bold text-gray-900 truncate text-[15px] group-hover:text-blue-600 transition-colors">
-                            {{ $project->name }}
-                        </h3>
+                <div class="relative group">
+                    {{-- Tombol aksi di pojok kanan atas, tetap tersembunyi sampai hover --}}
+                    <div class="absolute top-3 right-3 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <a href="{{ route('projects.edit', $project) }}"
+                            class="text-xs text-gray-500 hover:text-blue-600 bg-white/80 backdrop-blur px-2.5 py-1 rounded-lg border border-gray-200 transition-colors">
+                            Edit
+                        </a>
+                        <form action="{{ route('projects.destroy', $project) }}" method="POST"
+                            onsubmit="return confirm('Hapus project ini?')">
+                            @csrf @method('DELETE')
+                            <button type="submit"
+                                class="text-xs text-gray-500 hover:text-red-600 bg-white/80 backdrop-blur px-2.5 py-1 rounded-lg border border-gray-200 transition-colors">
+                                Hapus
+                            </button>
+                        </form>
                     </div>
-                    {{-- Deskripsi — line-clamp-2 = max 2 baris --}}
-                    <p class="text-sm text-gray-400 line-clamp-2 mb-4 min-h-[40px]">
-                        {{ $project->description ?: 'Tidak ada deskripsi' }}
-                    </p>
-                    {{-- Footer kartu: counter task + tombol edit/hapus --}}
-                    <div class="flex items-center justify-between pt-3 border-t border-[#ECECE9]">
-                        <span class="text-xs text-gray-400">
-                            📋 {{ $project->tasks_count }} tugas
-                        </span>
-                        {{-- onclick stopPropagation agar klik tombol tidak membuka halaman detail project --}}
-                        <div class="flex gap-1" onclick="event.stopPropagation()">
-                            <a href="{{ route('projects.edit', $project) }}"
-                                class="text-xs text-gray-400 hover:text-blue-600 px-2.5 py-1 rounded-lg transition-colors">
-                                Edit
-                            </a>
-                            <form action="{{ route('projects.destroy', $project) }}" method="POST"
-                                onsubmit="return confirm('Hapus project ini?')">
-                                @csrf @method('DELETE')
-                                <button type="submit"
-                                    class="text-xs text-gray-400 hover:text-red-600 px-2.5 py-1 rounded-lg transition-colors">
-                                    Hapus
-                                </button>
-                            </form>
+                    {{-- Kartu utama (area klik membuka detail) --}}
+                    <a href="{{ route('projects.show', $project) }}"
+                        class="block bg-white rounded-2xl border border-[#ECECE9] p-5 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 relative overflow-hidden">
+                        {{-- Strip warna di atas kartu --}}
+                        <div class="absolute top-0 left-0 right-0 h-[3px]" style="background-color:{{ $project->color }}"></div>
+                        {{-- Nama project + dot warna --}}
+                        <div class="flex items-center gap-2 mb-2 mt-1">
+                            <span class="w-[10px] h-[10px] rounded-full shrink-0"
+                                style="background-color:{{ $project->color }}"></span>
+                            <h3 class="font-bold text-gray-900 truncate text-[15px]">
+                                {{ $project->name }}
+                            </h3>
                         </div>
-                    </div>
-                </a>
+                        {{-- Deskripsi --}}
+                        <p class="text-sm text-gray-400 line-clamp-2 mb-4 min-h-[40px]">
+                            {{ $project->description ?: 'Tidak ada deskripsi' }}
+                        </p>
+                        {{-- Footer: counter task --}}
+                        <div class="flex items-center justify-between pt-3 border-t border-[#ECECE9]">
+                            <span class="text-xs text-gray-400">
+                                📋 {{ $project->tasks_count }} tugas
+                            </span>
+                        </div>
+                    </a>
+                </div>
             @endforeach
             {{-- Kartu khusus: tombol tambah project baru --}}
             <a href="{{ route('projects.create') }}"
