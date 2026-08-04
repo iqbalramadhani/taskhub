@@ -48,12 +48,14 @@ class TaskController extends Controller
             'description' => 'nullable|string',
             'priority'    => 'required|in:low,medium,high',
             'due_date'    => 'nullable|date|after_or_equal:today',
+            'attachments'   => 'nullable|array',
+            'attachments.*' => 'file|mimes:jpg,jpeg,png,pdf,doc,docx|max:2048',
         ]);
 
         // dd($validated);
 
         // simpan task
-        $project->tasks()->create([
+        $task = $project->tasks()->create([
             'user_id'      => auth()->id(),
             'title'        => $validated['title'],
             'description'  => $validated['description'] ?? null,
@@ -61,6 +63,18 @@ class TaskController extends Controller
             'due_date'     => $validated['due_date'] ?? null,
             'is_completed' => false,
         ]);
+
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $path = $file->store('attachments', 'public');
+                $task->attachments()->create([
+                    'file_path'     => $path,
+                    'original_name' => $file->getClientOriginalName(),
+                    'mime_type'     => $file->getMimeType(),
+                    'file_size'     => $file->getSize(),
+                ]);
+            }
+        }
 
         return redirect()->route('projects.show', $project)
             ->with('success', 'Tugas berhasil ditambahkan!');

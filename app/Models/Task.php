@@ -35,4 +35,10 @@ class Task extends Model
             && $this->due_date !== null
             && $this->due_date->isPast();
     }
+    
+    // app/Models/Task.php -- tambahkan relasi
+    public function attachments()
+    {
+        return $this->hasMany(TaskAttachment::class);
+    }
 }

@@ -14,7 +14,7 @@
 @section('content')
 <div class="max-w-2xl">
     <form action="{{ route('projects.tasks.store', $project) }}" method="POST"
-        class="th-card space-y-5">
+        class="th-card space-y-5" enctype="multipart/form-data">
         @csrf
 
         {{-- Judul --}}
@@ -72,6 +72,30 @@
                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                 @enderror
             </div>
+        </div>
+
+        {{-- Tambahkan di tasks/create.blade.php DAN tasks/edit.blade.php --}}
+        {{-- WAJIB: enctype="multipart/form-data" di tag <form> --}}
+
+        <div>
+            <label class="block text-sm font-semibold text-gray-900 mb-1.5">
+                Lampiran
+                <span class="text-gray-400 font-normal">
+                    (opsional · jpg, png, pdf, doc, docx · maks 2MB)
+                </span>
+            </label>
+            <input type="file" name="attachments[]" multiple
+                accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"
+                class="w-full text-sm text-gray-400
+                  file:mr-3 file:py-2 file:px-4
+                  file:rounded-xl file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-blue-100 file:text-blue-600
+                  hover:file:bg-blue-50
+                  transition-colors cursor-pointer">
+            @error('attachments.*')
+            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+            @enderror
         </div>
 
         {{-- Tombol --}}
