@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Models\Tag;
 use App\Models\Task;
+use App\Models\TaskTag;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -31,7 +33,8 @@ class TaskController extends Controller
     public function create(Project $project)
     {
         abort_if($project->user_id !== auth()->id(), 403);
-        return view('tasks.create', compact('project'));
+        $tags = Tag::orderBy('name', 'ASC')->get();
+        return view('tasks.create', compact('project', 'tags'));
     }
 
     /**
@@ -76,6 +79,16 @@ class TaskController extends Controller
             }
         }
 
+        if ($request->has('tags')) {
+            foreach ($request->tags as $tag) {
+                TaskTag::insert([
+                    'task_id' => $task->id,
+                    'tag_id' => $tag,
+                ]);
+            }
+            // sync($request->tags);
+        }
+
         return redirect()->route('projects.show', $project)
             ->with('success', 'Tugas berhasil ditambahkan!');
     }
@@ -95,7 +108,9 @@ class TaskController extends Controller
     {
         // pengecekan apakah ini task milik user
         abort_if($task->user_id !== auth()->id(), 403);
-        return view('tasks.edit', compact('project', 'task'));
+        $tags = Tag::orderBy('name', 'ASC')->get();
+        $tagTask = TaskTag::where('task_id', $task->id)->get();
+        return view('tasks.edit', compact('project', 'task', 'tags', 'tagTask'));
     }
 
     /**
@@ -116,6 +131,15 @@ class TaskController extends Controller
 
         // update task
         $task->update($validated);
+
+        // $task->tags()->sync($request->input('tags', []));
+        TaskTag::where('task_id', $task->id)->delete();
+        foreach ($request->tags as $tag) {
+                TaskTag::insert([
+                    'task_id' => $task->id,
+                    'tag_id' => $tag,
+                ]);
+            }
 
         return redirect()->route('projects.show', $project)->with('success', 'Tugas berhasil diperbarui!');
     }

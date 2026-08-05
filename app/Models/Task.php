@@ -35,10 +35,19 @@ class Task extends Model
             && $this->due_date !== null
             && $this->due_date->isPast();
     }
-    
+
     // app/Models/Task.php -- tambahkan relasi
     public function attachments()
     {
         return $this->hasMany(TaskAttachment::class);
     }
+
+    // Relasi: Task punya banyak Tag (many-to-many)
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class, 'task_tag', 'task_id', 'tag_id')->withPivot('tag_id');
+    }
+
+    // Catatan: Eloquent otomatis mencari tabel pivot "task_tag"
+    // berdasarkan konvensi nama (huruf kecil, diurutkan alfabet)
 }
